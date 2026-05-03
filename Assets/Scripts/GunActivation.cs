@@ -17,6 +17,12 @@ public class GunActivation : MonoBehaviour
     [SerializeField] float shakePositionAmount = 0.003f;
     [SerializeField] float shakeRotationAmount = 1.5f;
 
+    [Header("Attachment")]
+    [SerializeField] Transform tipTransform;
+    [SerializeField] float tipDetectRadius = 0.04f;
+    [SerializeField] float wheelSnapRadius = 0.15f;
+    [SerializeField] float holdToActivate = 1.0f;
+
     XRGrabInteractable grabInteractable;
     float nextHapticTime;
     bool isOn;
@@ -24,6 +30,12 @@ public class GunActivation : MonoBehaviour
     Vector3 shakeOriginalLocalPos;
     Quaternion shakeOriginalLocalRot;
     bool hasShakeOriginal;
+
+    Tuerca attachedNut;
+    float holdElapsed;
+    bool actionFiredThisPress;
+
+    static readonly Collider[] overlapBuffer = new Collider[16];
 
     void Awake()
     {
@@ -46,6 +58,11 @@ public class GunActivation : MonoBehaviour
         activateAction.action?.Disable();
         isOn = false;
         ResetShake();
+        if (attachedNut != null)
+        {
+            attachedNut.Release();
+            attachedNut = null;
+        }
     }
 
     void Update()
@@ -57,10 +74,26 @@ public class GunActivation : MonoBehaviour
         bool wasOn = isOn;
         isOn = grabbed && pressed;
 
+        if (!pressed)
+        {
+            holdElapsed = 0f;
+            actionFiredThisPress = false;
+        }
+
         if (!isOn)
         {
             if (wasOn) ResetShake();
             return;
+        }
+
+        if (!actionFiredThisPress)
+        {
+            holdElapsed += Time.deltaTime;
+            if (holdElapsed >= holdToActivate)
+            {
+                TryFireAction();
+                actionFiredThisPress = true;
+            }
         }
 
         float amplitude = handCount == 1 ? oneHandAmplitude : twoHandAmplitude;
@@ -75,6 +108,50 @@ public class GunActivation : MonoBehaviour
             if (grabInteractable.interactorsSelecting[i] is XRBaseInputInteractor ctrl)
                 ctrl.SendHapticImpulse(amplitude, hapticInterval);
         }
+    }
+
+    void TryFireAction()
+    {
+        if (tipTransform == null) return;
+
+        if (attachedNut == null)
+        {
+            Tuerca found = FindNutNearTip();
+            if (found != null)
+            {
+                attachedNut = found;
+                attachedNut.AttachToGun(tipTransform);
+            }
+            return;
+        }
+
+        WheelAttachPoint point = WheelAttachPoint.FindClosest(attachedNut.transform.position, wheelSnapRadius);
+        if (point != null)
+        {
+            attachedNut.SnapToWheel(point);
+            attachedNut = null;
+        }
+    }
+
+    Tuerca FindNutNearTip()
+    {
+        int count = Physics.OverlapSphereNonAlloc(tipTransform.position, tipDetectRadius, overlapBuffer, ~0, QueryTriggerInteraction.Collide);
+        Tuerca best = null;
+        float bestSqr = float.PositiveInfinity;
+        for (int i = 0; i < count; i++)
+        {
+            var col = overlapBuffer[i];
+            if (col == null) continue;
+            var nut = col.GetComponentInParent<Tuerca>();
+            if (nut == null || nut.IsAttachedToGun) continue;
+            float sqr = (nut.transform.position - tipTransform.position).sqrMagnitude;
+            if (sqr < bestSqr)
+            {
+                bestSqr = sqr;
+                best = nut;
+            }
+        }
+        return best;
     }
 
     void ApplyShake(float amplitude)
