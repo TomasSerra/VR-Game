@@ -305,6 +305,50 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &3239068256512359897
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5460904871711883779}
+  - component: {fileID: 74678390799691028}
+  m_Layer: 0
+  m_Name: GunSpawnPointForAnim
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5460904871711883779
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3239068256512359897}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
+  m_LocalPosition: {x: -1.5, y: 1.408, z: 1.9144}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6001814824303067056}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
+--- !u!114 &74678390799691028
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3239068256512359897}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c9732a35fa8d4e0bad641d6d6e0b76b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5997203707045013190
 GameObject:
   m_ObjectHideFlags: 0
@@ -491,6 +535,7 @@ GameObject:
   - component: {fileID: 2897245550266909268}
   - component: {fileID: 4465922238558247920}
   - component: {fileID: 4528050338263549676}
+  - component: {fileID: -8919181226127592585}
   m_Layer: 0
   m_Name: wheel
   m_TagString: Untagged
@@ -515,6 +560,7 @@ Transform:
   - {fileID: 6940327099054493308}
   - {fileID: 8818941691475519759}
   - {fileID: 8126123727289625358}
+  - {fileID: 5460904871711883779}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!64 &2105318728624558439
@@ -618,7 +664,7 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 1
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -763,3 +809,35 @@ MonoBehaviour:
   m_LimitAngularVelocity: 0
   m_MaxLinearVelocityDelta: 10
   m_MaxAngularVelocityDelta: 20
+--- !u!114 &-8919181226127592585
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6850475081948697865}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4cebb22fe7e74ac9856a38dfa50636b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gunPrefab: {fileID: 8401011359529441696, guid: bcdf7fc40485743a28e83db7bbc314e1, type: 3}
+  gunSpawnPoint: {fileID: 5460904871711883779}
+  runtimeGunParent: {fileID: 0}
+  wheelAttachPoint: {fileID: 3851188748179255608}
+  nut: {fileID: 5947411528036246774}
+  gunTipName: Tip Transform
+  fallbackSpawnLocalPosition: {x: 0, y: -0.45, z: 0.1}
+  fallbackSpawnLocalEulerAngles: {x: 0, y: 0, z: 0}
+  alignGunTipHeightToTarget: 1
+  verticalWorldDirection: {x: 0, y: 1, z: 0}
+  stopDistanceFromTarget: 0.015
+  approachDuration: 1.5
+  retreatDuration: 1.5
+  waitSecondsMin: 1
+  waitSecondsMax: 2
+  fadeInDuration: 1.2
+  fadeOutDuration: 1
+  fadeInWhileApproaching: 1
+  fadeOutWhileRetreating: 1
+  disableGunWhenHidden: 1
