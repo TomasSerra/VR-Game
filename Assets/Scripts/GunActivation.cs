@@ -112,6 +112,7 @@ public class GunActivation : MonoBehaviour
 
     void TryFireAction()
     {
+        if (GameModeManager.SelectedMode != GameModeManager.GameMode.Manual) return;
         if (tipTransform == null) return;
 
         if (attachedNut == null)

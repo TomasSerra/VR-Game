@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Rendering;
 
 [DisallowMultipleComponent]
@@ -41,6 +42,10 @@ public class WheelRemovalAnimation : MonoBehaviour
     [Header("Physics")]
     [SerializeField] bool makeRigidBodyKinematicWhileAnimating = true;
     [SerializeField] bool disableCollidersWhileAnimating = true;
+
+    [Header("Events")]
+    public UnityEvent OnRemovalComplete;
+    public UnityEvent OnInstallationComplete;
 
     Renderer[] renderers;
     Collider[] colliders;
@@ -152,6 +157,9 @@ public class WheelRemovalAnimation : MonoBehaviour
 
             if (disableGameObjectOnComplete)
                 gameObject.SetActive(false);
+
+            animationRoutine = null;
+            OnRemovalComplete?.Invoke();
         }
         else
         {
@@ -163,9 +171,10 @@ public class WheelRemovalAnimation : MonoBehaviour
             yield return MoveLocalPosition(horizontalTarget, basePosition, horizontalDuration, fadeMode: FadeMode.None);
 
             SetFade(1f);
-        }
 
-        animationRoutine = null;
+            animationRoutine = null;
+            OnInstallationComplete?.Invoke();
+        }
     }
 
     IEnumerator MoveLocalPosition(Vector3 from, Vector3 to, float duration, FadeMode fadeMode)
