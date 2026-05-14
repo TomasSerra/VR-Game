@@ -53,6 +53,13 @@ public class Tuerca : MonoBehaviour
         SetPhysics(kinematic: false, collidersEnabled: true);
     }
 
+    public void AutoDetach(Vector3 extraImpulse = default)
+    {
+        Release();
+        if (rb != null && extraImpulse.sqrMagnitude > 0f)
+            rb.AddForce(extraImpulse, ForceMode.Impulse);
+    }
+
     void SetPhysics(bool kinematic, bool collidersEnabled)
     {
         if (rb != null)
