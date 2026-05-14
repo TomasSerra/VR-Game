@@ -990,6 +990,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1437870025806165770, guid: ded097924053546338eb8fad89e7e25f, type: 3}
   m_PrefabInstance: {fileID: 6086638503792524674}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1176849768 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4168879891782918512, guid: d3506b54fd8ef4338a558c2904de7c76, type: 3}
+  m_PrefabInstance: {fileID: 1242951388}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c9732a35fa8d4e0bad641d6d6e0b76b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &1177071053 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 9034826025563400319, guid: 470c4fa0802a948d9b833e298a58a6a1, type: 3}
@@ -1028,6 +1039,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 617078918769091391, guid: d3506b54fd8ef4338a558c2904de7c76, type: 3}
+      propertyPath: retreatDuration
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 617078918769091391, guid: d3506b54fd8ef4338a558c2904de7c76, type: 3}
+      propertyPath: approachDuration
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 617078918769091391, guid: d3506b54fd8ef4338a558c2904de7c76, type: 3}
+      propertyPath: wheelAttachPoint
+      value: 
+      objectReference: {fileID: 1176849768}
     - target: {fileID: 953754854905197748, guid: d3506b54fd8ef4338a558c2904de7c76, type: 3}
       propertyPath: m_Name
       value: F1 Car
@@ -1038,7 +1061,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1281102134819732178, guid: d3506b54fd8ef4338a558c2904de7c76, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -7.64
+      value: -7.6
       objectReference: {fileID: 0}
     - target: {fileID: 1281102134819732178, guid: d3506b54fd8ef4338a558c2904de7c76, type: 3}
       propertyPath: m_LocalPosition.z
