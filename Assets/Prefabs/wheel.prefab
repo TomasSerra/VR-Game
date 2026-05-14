@@ -487,6 +487,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6001814824303067056}
   - component: {fileID: 2105318728624558439}
+  - component: {fileID: -948851435486775394}
   m_Layer: 0
   m_Name: wheel
   m_TagString: Untagged
@@ -535,3 +536,30 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
+--- !u!114 &-948851435486775394
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6850475081948697865}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d4fd3e1398774ab8bf2162dd47f4c0a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  horizontalOrigin: {fileID: 0}
+  horizontalAxis: 0
+  invertHorizontalAxis: 1
+  horizontalFallbackLocalDirection: {x: 1, y: 0, z: 0}
+  horizontalDistance: 0.45
+  horizontalDuration: 1
+  verticalWorldDirection: {x: 0, y: 1, z: 0}
+  verticalDistance: 0.7
+  verticalDuration: 1
+  fadeDuringLift: 1
+  fadeStartVerticalPercentage: 0.5
+  hideRenderersOnComplete: 1
+  disableGameObjectOnComplete: 0
+  makeRigidBodyKinematicWhileAnimating: 1
+  disableCollidersWhileAnimating: 1
