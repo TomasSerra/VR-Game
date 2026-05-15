@@ -574,7 +574,7 @@ MonoBehaviour:
   m_SmoothScale: 0
   m_SmoothScaleAmount: 8
   m_TightenScale: 0.1
-  m_ThrowOnDetach: 1
+  m_ThrowOnDetach: 0
   m_ThrowSmoothingDuration: 0.25
   m_ThrowSmoothingCurve:
     serializedVersion: 2
@@ -656,7 +656,7 @@ MonoBehaviour:
   shakeTarget: {fileID: 5520001903072827497}
   shakePositionAmount: 0.0001
   shakeRotationAmount: 1
-  tipTransform: {fileID: 0}
+  tipTransform: {fileID: 3722268388711230186}
   tipDetectRadius: 0.04
   wheelSnapRadius: 0.15
   holdToActivate: 1

@@ -7,14 +7,17 @@ public class WheelGameModeController : MonoBehaviour
     [Header("Wheel References")]
     [SerializeField] WheelRemovalAnimation wheelAnimation;
     [SerializeField] Tuerca[] attachedNuts;
+    [SerializeField] WheelNutGunAnimation nutGunAnimation;
     [SerializeField] XRGrabInteractable wheelGrabInteractable;
+    [SerializeField] TwoHandRequiredGrab wheelTwoHandGrab;
 
     [Header("Auto-detach Timing")]
     [SerializeField, Min(0f)] float initialDelay = 1.5f;
-    [SerializeField, Min(0f)] float perNutDelay = 0.3f;
+    [SerializeField, Min(0f)] float perNutDelayFallback = 0.3f;
     [SerializeField, Min(0f)] float delayBeforeWheelRemoval = 0.8f;
+    [SerializeField, Min(0f)] float delayAfterWheelRemovedBeforeInstall = 1.0f;
 
-    [Header("Auto-detach Impulse")]
+    [Header("Auto-detach Fallback Impulse (sin WheelNutGunAnimation)")]
     [SerializeField] float nutOutwardImpulse = 0.05f;
     [SerializeField] Transform wheelCenterForImpulse;
 
@@ -24,6 +27,8 @@ public class WheelGameModeController : MonoBehaviour
 
     bool isAnimatingChain;
     bool subscribedToTuerca;
+    bool subscribedToWheelRelease;
+    bool removeWheelChainRunning;
 
     IEnumerator Start()
     {
@@ -45,6 +50,11 @@ public class WheelGameModeController : MonoBehaviour
 
             case GameModeManager.GameMode.RemoveWheel:
                 yield return AutoDetachNutsCoroutine();
+                if (wheelTwoHandGrab != null)
+                {
+                    wheelTwoHandGrab.OnReleasedAfterCarry.AddListener(OnWheelReleasedAfterCarry);
+                    subscribedToWheelRelease = true;
+                }
                 yield break;
 
             case GameModeManager.GameMode.InstallWheel:
@@ -63,6 +73,51 @@ public class WheelGameModeController : MonoBehaviour
             Tuerca.OnDetachedByGun -= HandleTuercaDetached;
             subscribedToTuerca = false;
         }
+        if (subscribedToWheelRelease && wheelTwoHandGrab != null)
+        {
+            wheelTwoHandGrab.OnReleasedAfterCarry.RemoveListener(OnWheelReleasedAfterCarry);
+            subscribedToWheelRelease = false;
+        }
+    }
+
+    void OnWheelReleasedAfterCarry()
+    {
+        if (removeWheelChainRunning) return;
+        StartCoroutine(RemoveWheelInstallChainCoroutine());
+    }
+
+    IEnumerator RemoveWheelInstallChainCoroutine()
+    {
+        removeWheelChainRunning = true;
+
+        if (wheelGrabInteractable != null)
+            wheelGrabInteractable.enabled = false;
+
+        yield return new WaitForSeconds(delayAfterWheelRemovedBeforeInstall);
+
+        if (wheelTwoHandGrab != null)
+            wheelTwoHandGrab.ResetToAnchor();
+
+        if (wheelAnimation != null)
+        {
+            bool done = false;
+            UnityEngine.Events.UnityAction onComplete = () => done = true;
+            wheelAnimation.OnInstallationComplete.AddListener(onComplete);
+            wheelAnimation.PlayInstallation();
+            while (!done) yield return null;
+            wheelAnimation.OnInstallationComplete.RemoveListener(onComplete);
+        }
+
+        if (nutGunAnimation != null)
+        {
+            nutGunAnimation.PlayInstallation();
+            yield return new WaitUntil(() => !nutGunAnimation.IsPlaying);
+        }
+
+        if (wheelGrabInteractable != null)
+            wheelGrabInteractable.enabled = true;
+
+        removeWheelChainRunning = false;
     }
 
     void HandleTuercaDetached(Tuerca tuerca)
@@ -98,12 +153,20 @@ public class WheelGameModeController : MonoBehaviour
     IEnumerator AutoDetachNutsCoroutine()
     {
         yield return new WaitForSeconds(initialDelay);
+
+        if (nutGunAnimation != null)
+        {
+            nutGunAnimation.PlayRemoval();
+            yield return new WaitUntil(() => !nutGunAnimation.IsPlaying);
+            yield break;
+        }
+
         for (int i = 0; i < attachedNuts.Length; i++)
         {
             Tuerca nut = attachedNuts[i];
             if (nut != null)
                 nut.AutoDetach(GetOutwardImpulse(nut.transform));
-            yield return new WaitForSeconds(perNutDelay);
+            yield return new WaitForSeconds(perNutDelayFallback);
         }
     }
 

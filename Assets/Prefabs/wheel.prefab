@@ -302,9 +302,40 @@ MeshCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 5
-  m_Convex: 0
+  m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &2635080038973318395
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4917782132547303252}
+  m_Layer: 0
+  m_Name: SecondaryHandlePoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4917782132547303252
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2635080038973318395}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.964, y: 1.436, z: 2.215}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6001814824303067056}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3239068256512359897
 GameObject:
   m_ObjectHideFlags: 0
@@ -349,6 +380,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c9732a35fa8d4e0bad641d6d6e0b76b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &5868653821293477398
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5684819608682363286}
+  m_Layer: 0
+  m_Name: PrimaryHandlePoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5684819608682363286
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5868653821293477398}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.964, y: 1.436, z: 1.614}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6001814824303067056}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5997203707045013190
 GameObject:
   m_ObjectHideFlags: 0
@@ -536,6 +598,8 @@ GameObject:
   - component: {fileID: 4465922238558247920}
   - component: {fileID: 4528050338263549676}
   - component: {fileID: -8919181226127592585}
+  - component: {fileID: 5810482907472056744}
+  - component: {fileID: 3697921254631032531}
   m_Layer: 0
   m_Name: wheel
   m_TagString: Untagged
@@ -561,6 +625,8 @@ Transform:
   - {fileID: 8818941691475519759}
   - {fileID: 8126123727289625358}
   - {fileID: 5460904871711883779}
+  - {fileID: 5684819608682363286}
+  - {fileID: 4917782132547303252}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!64 &2105318728624558439
@@ -633,10 +699,13 @@ MonoBehaviour:
   wheelAnimation: {fileID: -948851435486775394}
   attachedNuts:
   - {fileID: 5947411528036246774}
+  nutGunAnimation: {fileID: -8919181226127592585}
   wheelGrabInteractable: {fileID: 4528050338263549676}
+  wheelTwoHandGrab: {fileID: 5810482907472056744}
   initialDelay: 1.5
-  perNutDelay: 0.3
+  perNutDelayFallback: 0.3
   delayBeforeWheelRemoval: 0.8
+  delayAfterWheelRemovedBeforeInstall: 1
   nutOutwardImpulse: 0.05
   wheelCenterForImpulse: {fileID: 8126123727289625358}
   gunRoot: {fileID: 0}
@@ -715,19 +784,7 @@ MonoBehaviour:
       m_Calls: []
   m_SelectEntered:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 2897245550266909268}
-        m_TargetAssemblyTypeName: WheelGameModeController, Assembly-CSharp
-        m_MethodName: RequestWheelRemoval
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   m_SelectExited:
     m_PersistentCalls:
       m_Calls: []
@@ -754,8 +811,8 @@ MonoBehaviour:
   m_StartingInteractionStrengthFilters: []
   m_AutoFindParentInteractableInHierarchy: 0
   m_ParentInteractableObject: {fileID: 0}
-  m_AttachTransform: {fileID: 0}
-  m_SecondaryAttachTransform: {fileID: 0}
+  m_AttachTransform: {fileID: 5684819608682363286}
+  m_SecondaryAttachTransform: {fileID: 4917782132547303252}
   m_UseDynamicAttach: 0
   m_MatchAttachPosition: 1
   m_MatchAttachRotation: 1
@@ -780,7 +837,7 @@ MonoBehaviour:
   m_SmoothScale: 0
   m_SmoothScaleAmount: 8
   m_TightenScale: 0.1
-  m_ThrowOnDetach: 1
+  m_ThrowOnDetach: 0
   m_ThrowSmoothingDuration: 0.25
   m_ThrowSmoothingCurve:
     serializedVersion: 2
@@ -841,3 +898,41 @@ MonoBehaviour:
   fadeInWhileApproaching: 1
   fadeOutWhileRetreating: 1
   disableGunWhenHidden: 1
+--- !u!114 &5810482907472056744
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6850475081948697865}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3694c45d59f8e4b039ee04b88d32f008, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OnReleasedAfterCarry:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &3697921254631032531
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6850475081948697865}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0a1302d0d134fa8a2a5b3bf4aec3c20, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_PermittedDisplacementAxes: -1
+  m_ConstrainedAxisDisplacementMode: 1
+  m_TwoHandedRotationMode: 2
+  m_AllowOneHandedScaling: 1
+  m_AllowTwoHandedScaling: 1
+  m_OneHandedScaleSpeed: 0.5
+  m_ThresholdMoveRatioForScale: 0.05
+  m_ClampScaling: 1
+  m_MinimumScaleRatio: 0.25
+  m_MaximumScaleRatio: 2
+  m_ScaleMultiplier: 0.25
