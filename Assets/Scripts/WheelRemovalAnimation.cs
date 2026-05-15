@@ -22,6 +22,7 @@ public class WheelRemovalAnimation : MonoBehaviour
 
     [Header("Horizontal Pull")]
     [SerializeField] Transform horizontalOrigin;
+    [SerializeField] Transform horizontalReferencePoint;
     [SerializeField] LocalAxis horizontalAxis = LocalAxis.Y;
     [SerializeField] bool invertHorizontalAxis;
     [SerializeField] Vector3 horizontalFallbackLocalDirection = Vector3.right;
@@ -50,6 +51,9 @@ public class WheelRemovalAnimation : MonoBehaviour
     Renderer[] renderers;
     Collider[] colliders;
     Rigidbody rb;
+    WheelAttachPoint cachedWheelAttachPoint;
+    TwoHandRequiredGrab twoHandRequiredGrab;
+    bool originalTwoHandRequiredGrabEnabled;
 
     bool[] originalRendererStates;
     bool[] originalColliderStates;
@@ -66,6 +70,8 @@ public class WheelRemovalAnimation : MonoBehaviour
         renderers = GetComponentsInChildren<Renderer>(true);
         colliders = GetComponentsInChildren<Collider>(true);
         rb = GetComponent<Rigidbody>();
+        cachedWheelAttachPoint = FindPrimaryWheelAttachPoint();
+        twoHandRequiredGrab = GetComponent<TwoHandRequiredGrab>();
 
         originalRendererStates = new bool[renderers.Length];
         for (int i = 0; i < renderers.Length; i++)
@@ -80,6 +86,9 @@ public class WheelRemovalAnimation : MonoBehaviour
             originalRbIsKinematic = rb.isKinematic;
             originalRbUsesGravity = rb.useGravity;
         }
+
+        if (twoHandRequiredGrab != null)
+            originalTwoHandRequiredGrabEnabled = twoHandRequiredGrab.enabled;
 
         initialLocalPosition = transform.localPosition;
         initialLocalRotation = transform.localRotation;
@@ -127,6 +136,7 @@ public class WheelRemovalAnimation : MonoBehaviour
         RestoreColliders();
         RestoreRigidBody();
         RestoreMaterials();
+        RestoreTwoHandRequiredGrab();
     }
 
     IEnumerator PlayRoutine(PlaybackDirection direction)
@@ -158,6 +168,7 @@ public class WheelRemovalAnimation : MonoBehaviour
             if (disableGameObjectOnComplete)
                 gameObject.SetActive(false);
 
+            RestoreTwoHandRequiredGrab();
             animationRoutine = null;
             OnRemovalComplete?.Invoke();
         }
@@ -171,6 +182,10 @@ public class WheelRemovalAnimation : MonoBehaviour
             yield return MoveLocalPosition(horizontalTarget, basePosition, horizontalDuration, fadeMode: FadeMode.None);
 
             SetFade(1f);
+            RestoreMaterials();
+            RestoreColliders();
+            RestoreRigidBody();
+            RestoreTwoHandRequiredGrab();
 
             animationRoutine = null;
             OnInstallationComplete?.Invoke();
@@ -205,6 +220,7 @@ public class WheelRemovalAnimation : MonoBehaviour
     {
         RestoreRenderers();
         RestoreMaterials();
+        DisableTwoHandRequiredGrabForAnimation();
 
         if (makeRigidBodyKinematicWhileAnimating && rb != null)
         {
@@ -298,6 +314,23 @@ public class WheelRemovalAnimation : MonoBehaviour
         rb.useGravity = originalRbUsesGravity;
     }
 
+    void DisableTwoHandRequiredGrabForAnimation()
+    {
+        if (twoHandRequiredGrab == null)
+            return;
+
+        originalTwoHandRequiredGrabEnabled = twoHandRequiredGrab.enabled;
+        twoHandRequiredGrab.enabled = false;
+    }
+
+    void RestoreTwoHandRequiredGrab()
+    {
+        if (twoHandRequiredGrab == null)
+            return;
+
+        twoHandRequiredGrab.enabled = originalTwoHandRequiredGrabEnabled;
+    }
+
     Vector3 GetHorizontalLocalDirection()
     {
         Transform origin = horizontalOrigin != null ? horizontalOrigin : transform.parent;
@@ -305,7 +338,7 @@ public class WheelRemovalAnimation : MonoBehaviour
 
         if (origin != null)
         {
-            Vector3 localOffset = origin.InverseTransformPoint(transform.position);
+            Vector3 localOffset = origin.InverseTransformPoint(GetHorizontalReferenceWorldPosition());
             float axisValue = GetAxisValue(localOffset, horizontalAxis);
             float sign = Mathf.Approximately(axisValue, 0f) ? 0f : Mathf.Sign(axisValue);
 
@@ -329,6 +362,62 @@ public class WheelRemovalAnimation : MonoBehaviour
             ? horizontalFallbackLocalDirection.normalized
             : Vector3.right;
         return fallbackDirection;
+    }
+
+    Vector3 GetHorizontalReferenceWorldPosition()
+    {
+        if (horizontalReferencePoint != null)
+            return horizontalReferencePoint.position;
+
+        if (cachedWheelAttachPoint != null)
+            return cachedWheelAttachPoint.transform.position;
+
+        if (TryGetCombinedRendererBoundsCenter(out Vector3 boundsCenter))
+            return boundsCenter;
+
+        return transform.position;
+    }
+
+    WheelAttachPoint FindPrimaryWheelAttachPoint()
+    {
+        WheelAttachPoint[] points = GetComponentsInChildren<WheelAttachPoint>(true);
+        for (int i = 0; i < points.Length; i++)
+        {
+            if (points[i] != null && points[i].name == "AttachPoint")
+                return points[i];
+        }
+
+        return points.Length > 0 ? points[0] : null;
+    }
+
+    bool TryGetCombinedRendererBoundsCenter(out Vector3 center)
+    {
+        center = default;
+        bool hasBounds = false;
+        Bounds combinedBounds = default;
+
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            Renderer renderer = renderers[i];
+            if (renderer == null || !renderer.enabled)
+                continue;
+
+            if (!hasBounds)
+            {
+                combinedBounds = renderer.bounds;
+                hasBounds = true;
+            }
+            else
+            {
+                combinedBounds.Encapsulate(renderer.bounds);
+            }
+        }
+
+        if (!hasBounds)
+            return false;
+
+        center = combinedBounds.center;
+        return true;
     }
 
     static Vector3 AxisToVector(LocalAxis axis)

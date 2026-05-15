@@ -664,6 +664,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   horizontalOrigin: {fileID: 0}
+  horizontalReferencePoint: {fileID: 8126123727289625358}
   horizontalAxis: 0
   invertHorizontalAxis: 0
   horizontalFallbackLocalDirection: {x: 1, y: 0, z: 0}
