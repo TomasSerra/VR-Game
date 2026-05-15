@@ -1,7 +1,10 @@
+using System;
 using UnityEngine;
 
 public class Tuerca : MonoBehaviour
 {
+    public static event Action<Tuerca> OnDetachedByGun;
+
     Rigidbody rb;
     Collider[] colliders;
     Vector3 originalLossyScale;
@@ -20,6 +23,7 @@ public class Tuerca : MonoBehaviour
         IsAttachedToGun = true;
         ReparentPreservingWorldScale(tip);
         SetPhysics(kinematic: true, collidersEnabled: false);
+        OnDetachedByGun?.Invoke(this);
     }
 
     public void SnapToWheel(WheelAttachPoint point)

@@ -599,7 +599,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   horizontalOrigin: {fileID: 0}
   horizontalAxis: 0
-  invertHorizontalAxis: 1
+  invertHorizontalAxis: 0
   horizontalFallbackLocalDirection: {x: 1, y: 0, z: 0}
   horizontalDistance: 0.45
   horizontalDuration: 1
@@ -663,7 +663,7 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
@@ -685,7 +685,7 @@ MonoBehaviour:
   m_InteractionLayers:
     m_Bits: 1
   m_DistanceCalculationMode: 1
-  m_SelectMode: 0
+  m_SelectMode: 1
   m_FocusMode: 1
   m_CustomReticle: {fileID: 0}
   m_AllowGazeInteraction: 0
@@ -762,7 +762,7 @@ MonoBehaviour:
   m_SnapToColliderVolume: 1
   m_ReinitializeDynamicAttachEverySingleGrab: 1
   m_AttachEaseInTime: 0.15
-  m_MovementType: 2
+  m_MovementType: 1
   m_PredictedVisualsTransform: {fileID: 0}
   m_VelocityDamping: 1
   m_VelocityScale: 1

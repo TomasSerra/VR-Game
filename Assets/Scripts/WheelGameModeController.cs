@@ -22,6 +22,9 @@ public class WheelGameModeController : MonoBehaviour
     [SerializeField] GameObject gunRoot;
     [SerializeField] GameObject newWheelPickupRoot;
 
+    bool isAnimatingChain;
+    bool subscribedToTuerca;
+
     IEnumerator Start()
     {
         GameModeManager.GameMode mode = GameModeManager.SelectedMode;
@@ -36,6 +39,8 @@ public class WheelGameModeController : MonoBehaviour
         switch (mode)
         {
             case GameModeManager.GameMode.Manual:
+                Tuerca.OnDetachedByGun += HandleTuercaDetached;
+                subscribedToTuerca = true;
                 yield break;
 
             case GameModeManager.GameMode.RemoveWheel:
@@ -49,6 +54,45 @@ public class WheelGameModeController : MonoBehaviour
                     wheelAnimation.PlayRemoval();
                 yield break;
         }
+    }
+
+    void OnDestroy()
+    {
+        if (subscribedToTuerca)
+        {
+            Tuerca.OnDetachedByGun -= HandleTuercaDetached;
+            subscribedToTuerca = false;
+        }
+    }
+
+    void HandleTuercaDetached(Tuerca tuerca)
+    {
+        if (isAnimatingChain) return;
+        if (wheelAnimation == null) return;
+        if (System.Array.IndexOf(attachedNuts, tuerca) < 0) return;
+
+        StartCoroutine(ManualChainCoroutine());
+    }
+
+    IEnumerator ManualChainCoroutine()
+    {
+        isAnimatingChain = true;
+
+        bool removalDone = false;
+        UnityEngine.Events.UnityAction onRemovalComplete = () => removalDone = true;
+        wheelAnimation.OnRemovalComplete.AddListener(onRemovalComplete);
+        wheelAnimation.PlayRemoval();
+        while (!removalDone) yield return null;
+        wheelAnimation.OnRemovalComplete.RemoveListener(onRemovalComplete);
+
+        bool installDone = false;
+        UnityEngine.Events.UnityAction onInstallComplete = () => installDone = true;
+        wheelAnimation.OnInstallationComplete.AddListener(onInstallComplete);
+        wheelAnimation.PlayInstallation();
+        while (!installDone) yield return null;
+        wheelAnimation.OnInstallationComplete.RemoveListener(onInstallComplete);
+
+        isAnimatingChain = false;
     }
 
     IEnumerator AutoDetachNutsCoroutine()
@@ -75,6 +119,7 @@ public class WheelGameModeController : MonoBehaviour
     public void RequestWheelRemoval()
     {
         if (GameModeManager.SelectedMode != GameModeManager.GameMode.RemoveWheel) return;
+        if (wheelGrabInteractable != null && wheelGrabInteractable.interactorsSelecting.Count < 2) return;
         if (wheelAnimation != null)
             wheelAnimation.PlayRemoval();
     }
