@@ -59,6 +59,7 @@ public class WheelRemovalAnimation : MonoBehaviour
     bool[] originalColliderStates;
     bool originalRbIsKinematic;
     bool originalRbUsesGravity;
+    bool hasCapturedRuntimePhysicsState;
 
     Vector3 initialLocalPosition;
     Quaternion initialLocalRotation;
@@ -77,6 +78,20 @@ public class WheelRemovalAnimation : MonoBehaviour
         for (int i = 0; i < renderers.Length; i++)
             originalRendererStates[i] = renderers[i] != null && renderers[i].enabled;
 
+        if (twoHandRequiredGrab != null)
+            originalTwoHandRequiredGrabEnabled = twoHandRequiredGrab.enabled;
+
+        initialLocalPosition = transform.localPosition;
+        initialLocalRotation = transform.localRotation;
+        materialStates = CreateMaterialStates();
+        RestoreMaterials();
+    }
+
+    void CaptureRuntimePhysicsStateIfNeeded()
+    {
+        if (hasCapturedRuntimePhysicsState)
+            return;
+
         originalColliderStates = new bool[colliders.Length];
         for (int i = 0; i < colliders.Length; i++)
             originalColliderStates[i] = colliders[i] != null && colliders[i].enabled;
@@ -87,13 +102,7 @@ public class WheelRemovalAnimation : MonoBehaviour
             originalRbUsesGravity = rb.useGravity;
         }
 
-        if (twoHandRequiredGrab != null)
-            originalTwoHandRequiredGrabEnabled = twoHandRequiredGrab.enabled;
-
-        initialLocalPosition = transform.localPosition;
-        initialLocalRotation = transform.localRotation;
-        materialStates = CreateMaterialStates();
-        RestoreMaterials();
+        hasCapturedRuntimePhysicsState = true;
     }
 
     [ContextMenu("Play Removal")]
@@ -132,6 +141,7 @@ public class WheelRemovalAnimation : MonoBehaviour
         transform.localPosition = initialLocalPosition;
         transform.localRotation = initialLocalRotation;
 
+        CaptureRuntimePhysicsStateIfNeeded();
         RestoreRenderers();
         RestoreColliders();
         RestoreRigidBody();
@@ -218,6 +228,7 @@ public class WheelRemovalAnimation : MonoBehaviour
 
     void PrepareForAnimation()
     {
+        CaptureRuntimePhysicsStateIfNeeded();
         RestoreRenderers();
         RestoreMaterials();
         DisableTwoHandRequiredGrabForAnimation();

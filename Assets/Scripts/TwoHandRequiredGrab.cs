@@ -1,11 +1,13 @@
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.XR.Interaction.Toolkit.Filtering;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
 [RequireComponent(typeof(XRGrabInteractable))]
 [RequireComponent(typeof(Rigidbody))]
-public class TwoHandRequiredGrab : MonoBehaviour
+public class TwoHandRequiredGrab : MonoBehaviour, IXRSelectFilter
 {
     public UnityEvent OnReleasedAfterCarry;
 
@@ -16,6 +18,9 @@ public class TwoHandRequiredGrab : MonoBehaviour
     Quaternion anchorLocalRot;
     bool wasCarried;
     bool wasCarrying;
+    bool filterRegistered;
+
+    public bool canProcess => isActiveAndEnabled;
 
     void Awake()
     {
@@ -28,12 +33,44 @@ public class TwoHandRequiredGrab : MonoBehaviour
         grab.matchAttachRotation = false;
     }
 
+    void OnEnable()
+    {
+        if (grab != null && !filterRegistered)
+        {
+            grab.selectFilters.Add(this);
+            filterRegistered = true;
+        }
+    }
+
+    void OnDisable()
+    {
+        if (grab != null && filterRegistered)
+        {
+            grab.selectFilters.Remove(this);
+            filterRegistered = false;
+        }
+    }
+
     void Start()
     {
         anchorParent = transform.parent;
         anchorLocalPos = transform.localPosition;
         anchorLocalRot = transform.localRotation;
-        SetAnchoredPhysics();
+        SnapToAnchor();
+    }
+
+    // Bloquea cualquier intento de XR de seleccionar la rueda con una sola mano:
+    // el primer selector sólo se acepta cuando ya hay 2 interactores haciendo hover,
+    // y a partir de ahí se permite que entre el segundo (count >= 1).
+    public bool Process(IXRSelectInteractor interactor, IXRSelectInteractable interactable)
+    {
+        if (wasCarried)
+            return true;
+
+        if (grab.interactorsSelecting.Count >= 1)
+            return true;
+
+        return grab.interactorsHovering.Count >= 2;
     }
 
     void LateUpdate()
@@ -52,20 +89,16 @@ public class TwoHandRequiredGrab : MonoBehaviour
             return;
         }
 
+        if (!wasCarried)
+        {
+            SnapToAnchor();
+            return;
+        }
+
         if (wasCarrying)
         {
             wasCarrying = false;
             OnReleasedAfterCarry?.Invoke();
-        }
-
-        if (!wasCarried)
-        {
-            SetAnchoredPhysics();
-            if (transform.parent != anchorParent)
-                transform.SetParent(anchorParent, false);
-            transform.localPosition = anchorLocalPos;
-            transform.localRotation = anchorLocalRot;
-            return;
         }
 
         rb.isKinematic = false;
@@ -74,12 +107,23 @@ public class TwoHandRequiredGrab : MonoBehaviour
 
     public void ResetToAnchor()
     {
-        transform.SetParent(anchorParent, false);
-        transform.localPosition = anchorLocalPos;
-        transform.localRotation = anchorLocalRot;
         wasCarried = false;
         wasCarrying = false;
+        SnapToAnchor();
+    }
+
+    void SnapToAnchor()
+    {
         SetAnchoredPhysics();
+        if (anchorParent != null && transform.parent != anchorParent)
+            transform.SetParent(anchorParent, false);
+        transform.localPosition = anchorLocalPos;
+        transform.localRotation = anchorLocalRot;
+        if (rb != null)
+        {
+            rb.position = transform.position;
+            rb.rotation = transform.rotation;
+        }
     }
 
     void SetAnchoredPhysics()

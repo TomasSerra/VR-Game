@@ -44,6 +44,13 @@ public class WheelGameModeController : MonoBehaviour
         switch (mode)
         {
             case GameModeManager.GameMode.Manual:
+                // En modo Manual sólo se agarra la gun: la rueda no necesita TwoHandRequiredGrab
+                // y debe quedar siempre kinematic para que no interfiera físicamente con la gun
+                // (evita que al final del PlayInstallation el rb se vuelva dinámico por un frame
+                // y mande torques raros a la gun).
+                if (wheelTwoHandGrab != null)
+                    wheelTwoHandGrab.enabled = false;
+                AnchorWheelKinematic();
                 Tuerca.OnDetachedByGun += HandleTuercaDetached;
                 subscribedToTuerca = true;
                 yield break;
@@ -168,6 +175,17 @@ public class WheelGameModeController : MonoBehaviour
                 nut.AutoDetach(GetOutwardImpulse(nut.transform));
             yield return new WaitForSeconds(perNutDelayFallback);
         }
+    }
+
+    void AnchorWheelKinematic()
+    {
+        if (wheelAnimation == null) return;
+        Rigidbody wheelRb = wheelAnimation.GetComponent<Rigidbody>();
+        if (wheelRb == null) return;
+        wheelRb.linearVelocity = Vector3.zero;
+        wheelRb.angularVelocity = Vector3.zero;
+        wheelRb.isKinematic = true;
+        wheelRb.useGravity = false;
     }
 
     Vector3 GetOutwardImpulse(Transform nut)
