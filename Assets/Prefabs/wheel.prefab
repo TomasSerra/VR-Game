@@ -711,6 +711,11 @@ MonoBehaviour:
   wheelCenterForImpulse: {fileID: 8126123727289625358}
   gunRoot: {fileID: 0}
   newWheelPickupRoot: {fileID: 0}
+  carMovement: {fileID: 0}
+  pitAlert: {fileID: 0}
+  pitTimer: {fileID: 0}
+  timeBeforeAlert: 3
+  timeBetweenAlertAndArrival: 10
 --- !u!54 &4465922238558247920
 Rigidbody:
   m_ObjectHideFlags: 0

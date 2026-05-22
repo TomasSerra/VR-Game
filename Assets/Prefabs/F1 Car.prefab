@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1281102134819732178}
   - component: {fileID: 4463607592261511303}
+  - component: {fileID: 3572150612000104493}
   m_Layer: 0
   m_Name: F1 Car
   m_TagString: Untagged
@@ -27,7 +28,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 21.567406, y: -0.029999733, z: 2.11}
-  m_LocalScale: {x: 1.4897164, y: 1.4897164, z: 1.4897164}
+  m_LocalScale: {x: 1.4096097, y: 1.4096097, z: 1.4096097}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5367427624392062795}
@@ -41,6 +42,7 @@ Transform:
   - {fileID: 8042321848744182449}
   - {fileID: 7835449653415182421}
   - {fileID: 6909163012050399224}
+  - {fileID: 8561584478969705513}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
 --- !u!54 &4463607592261511303
@@ -70,6 +72,76 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &3572150612000104493
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 953754854905197748}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ac4ad9fdd54a411f8cf5bf3ac50b9f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pitInitial: {fileID: 0}
+  pitStop: {fileID: 0}
+  pitFinal: {fileID: 0}
+  arrivalDuration: 5
+  arrivalCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  matchInitialRotation: 1
+  matchStopRotation: 1
+  departureDuration: 5
+  departureCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  fadeRenderers: []
+  fadeDuration: 3
+  fadeStartProgress: 0.3
 --- !u!1 &2951111723626119218
 GameObject:
   m_ObjectHideFlags: 0
@@ -759,6 +831,90 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &8927099059112304805
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8561584478969705513}
+  - component: {fileID: 1086798765317080375}
+  - component: {fileID: 9075828803303173214}
+  m_Layer: 0
+  m_Name: InstallZone
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8561584478969705513
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8927099059112304805}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.43, y: -1.412, z: 1.874}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1281102134819732178}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &1086798765317080375
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8927099059112304805}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.57437617, y: 0.6910448, z: 0.6817627}
+  m_Center: {x: 0.21281335, y: 0.034474168, z: 0.034727313}
+--- !u!114 &9075828803303173214
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8927099059112304805}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85c5e08473c254c23ae321d9daa21f51, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  newWheelTag: NewWheel
+  oneShot: 1
+  requireTwoHandGrab: 1
+  OnWheelInstalled:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2897245550266909268, guid: 748ac3fb9e2f346548d8055810cdcef7, type: 3}
+        m_TargetAssemblyTypeName: WheelGameModeController, Assembly-CSharp
+        m_MethodName: RequestWheelInstallation
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1001 &912258130011344968
 PrefabInstance:
   m_ObjectHideFlags: 0

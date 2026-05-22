@@ -4,6 +4,7 @@ using UnityEngine;
 public class Tuerca : MonoBehaviour
 {
     public static event Action<Tuerca> OnDetachedByGun;
+    public static event Action<Tuerca> OnAttachedToWheel;
 
     Rigidbody rb;
     Collider[] colliders;
@@ -31,6 +32,7 @@ public class Tuerca : MonoBehaviour
         IsAttachedToGun = false;
         ReparentPreservingWorldScale(point.transform);
         SetPhysics(kinematic: true, collidersEnabled: true);
+        OnAttachedToWheel?.Invoke(this);
     }
 
     void ReparentPreservingWorldScale(Transform newParent)

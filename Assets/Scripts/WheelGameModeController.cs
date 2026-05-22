@@ -25,17 +25,27 @@ public class WheelGameModeController : MonoBehaviour
     [SerializeField] GameObject gunRoot;
     [SerializeField] GameObject newWheelPickupRoot;
 
+    [Header("Pit Stop Flow (Manual mode)")]
+    [SerializeField] F1CarPitMovement carMovement;
+    [SerializeField] PitAlertController pitAlert;
+    [SerializeField] PitTimerDisplay pitTimer;
+    [SerializeField, Min(0f)] float timeBeforeAlert = 3f;
+    [SerializeField, Min(0f)] float timeBetweenAlertAndArrival = 5f;
+
     bool isAnimatingChain;
     bool subscribedToTuerca;
+    bool subscribedToTuercaAttach;
     bool subscribedToWheelRelease;
     bool removeWheelChainRunning;
+    bool nutReinstalled;
 
     IEnumerator Start()
     {
         GameModeManager.GameMode mode = GameModeManager.SelectedMode;
 
+        // En modo Manual la gun se activa recién cuando el auto frena en pits.
         if (gunRoot != null)
-            gunRoot.SetActive(mode == GameModeManager.GameMode.Manual);
+            gunRoot.SetActive(false);
         if (newWheelPickupRoot != null)
             newWheelPickupRoot.SetActive(mode == GameModeManager.GameMode.InstallWheel);
         if (wheelGrabInteractable != null)
@@ -53,6 +63,9 @@ public class WheelGameModeController : MonoBehaviour
                 AnchorWheelKinematic();
                 Tuerca.OnDetachedByGun += HandleTuercaDetached;
                 subscribedToTuerca = true;
+                Tuerca.OnAttachedToWheel += HandleTuercaAttachedToWheel;
+                subscribedToTuercaAttach = true;
+                yield return StartCoroutine(PitStopSequence());
                 yield break;
 
             case GameModeManager.GameMode.RemoveWheel:
@@ -80,11 +93,60 @@ public class WheelGameModeController : MonoBehaviour
             Tuerca.OnDetachedByGun -= HandleTuercaDetached;
             subscribedToTuerca = false;
         }
+        if (subscribedToTuercaAttach)
+        {
+            Tuerca.OnAttachedToWheel -= HandleTuercaAttachedToWheel;
+            subscribedToTuercaAttach = false;
+        }
         if (subscribedToWheelRelease && wheelTwoHandGrab != null)
         {
             wheelTwoHandGrab.OnReleasedAfterCarry.RemoveListener(OnWheelReleasedAfterCarry);
             subscribedToWheelRelease = false;
         }
+    }
+
+    IEnumerator PitStopSequence()
+    {
+        if (carMovement != null)
+            carMovement.TeleportToInitial();
+        if (pitAlert != null)
+            pitAlert.HideAlert();
+        if (pitTimer != null)
+            pitTimer.ResetTimer();
+
+        if (timeBeforeAlert > 0f)
+            yield return new WaitForSeconds(timeBeforeAlert);
+
+        if (pitAlert != null)
+            pitAlert.ShowAlert();
+
+        if (timeBetweenAlertAndArrival > 0f)
+            yield return new WaitForSeconds(timeBetweenAlertAndArrival);
+
+        if (carMovement != null)
+            yield return carMovement.MoveToStop();
+
+        if (pitTimer != null)
+            pitTimer.StartTimer();
+        if (gunRoot != null)
+            gunRoot.SetActive(true);
+
+        nutReinstalled = false;
+        yield return new WaitUntil(() => nutReinstalled && !isAnimatingChain);
+
+        if (pitTimer != null)
+            pitTimer.StopTimer();
+        if (gunRoot != null)
+            gunRoot.SetActive(false);
+
+        if (carMovement != null)
+            yield return carMovement.LeaveAndFade();
+    }
+
+    void HandleTuercaAttachedToWheel(Tuerca tuerca)
+    {
+        if (System.Array.IndexOf(attachedNuts, tuerca) < 0) return;
+        nutReinstalled = true;
     }
 
     void OnWheelReleasedAfterCarry()
