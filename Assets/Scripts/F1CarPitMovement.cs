@@ -17,6 +17,8 @@ public class F1CarPitMovement : MonoBehaviour
     [SerializeField] bool matchInitialRotation = true;
     [SerializeField] bool matchStopRotation = true;
 
+    public float ArrivalDuration => arrivalDuration;
+
     [Header("Departure (PitStop -> PitFinal)")]
     [SerializeField, Min(0.01f)] float departureDuration = 5f;
     [SerializeField] AnimationCurve departureCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);

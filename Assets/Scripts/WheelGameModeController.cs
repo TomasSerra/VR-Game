@@ -117,8 +117,9 @@ public class WheelGameModeController : MonoBehaviour
         if (timeBeforeAlert > 0f)
             yield return new WaitForSeconds(timeBeforeAlert);
 
+        float arrivalDuration = carMovement != null ? carMovement.ArrivalDuration : 0f;
         if (pitAlert != null)
-            pitAlert.ShowAlert();
+            pitAlert.ShowAlert(timeBetweenAlertAndArrival + arrivalDuration);
 
         if (timeBetweenAlertAndArrival > 0f)
             yield return new WaitForSeconds(timeBetweenAlertAndArrival);
