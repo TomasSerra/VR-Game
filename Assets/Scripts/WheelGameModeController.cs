@@ -38,6 +38,23 @@ public class WheelGameModeController : MonoBehaviour
     bool subscribedToWheelRelease;
     bool removeWheelChainRunning;
     bool nutReinstalled;
+    bool isPlayerInteractableWheel = true;
+
+    public bool IsAutomatedPitStopRunning { get; private set; }
+
+    public void SetPlayerInteractableWheel(bool isPlayerWheel)
+    {
+        isPlayerInteractableWheel = isPlayerWheel;
+
+        if (isPlayerWheel)
+            return;
+
+        if (wheelGrabInteractable != null)
+            wheelGrabInteractable.enabled = false;
+        if (wheelTwoHandGrab != null)
+            wheelTwoHandGrab.enabled = false;
+        AnchorWheelKinematic();
+    }
 
     IEnumerator Start()
     {
@@ -47,13 +64,23 @@ public class WheelGameModeController : MonoBehaviour
         if (gunRoot != null)
             gunRoot.SetActive(false);
         if (newWheelPickupRoot != null)
-            newWheelPickupRoot.SetActive(mode == GameModeManager.GameMode.InstallWheel);
+            newWheelPickupRoot.SetActive(isPlayerInteractableWheel && mode == GameModeManager.GameMode.InstallWheel);
         if (wheelGrabInteractable != null)
-            wheelGrabInteractable.enabled = mode == GameModeManager.GameMode.RemoveWheel;
+            wheelGrabInteractable.enabled = isPlayerInteractableWheel && mode == GameModeManager.GameMode.RemoveWheel;
 
         switch (mode)
         {
             case GameModeManager.GameMode.Manual:
+                if (!isPlayerInteractableWheel)
+                {
+                    if (wheelTwoHandGrab != null)
+                        wheelTwoHandGrab.enabled = false;
+                    if (wheelGrabInteractable != null)
+                        wheelGrabInteractable.enabled = false;
+                    AnchorWheelKinematic();
+                    yield break;
+                }
+
                 // En modo Manual sólo se agarra la gun: la rueda no necesita TwoHandRequiredGrab
                 // y debe quedar siempre kinematic para que no interfiera físicamente con la gun
                 // (evita que al final del PlayInstallation el rb se vuelva dinámico por un frame
@@ -69,6 +96,12 @@ public class WheelGameModeController : MonoBehaviour
                 yield break;
 
             case GameModeManager.GameMode.RemoveWheel:
+                if (!isPlayerInteractableWheel)
+                {
+                    AnchorWheelKinematic();
+                    yield break;
+                }
+
                 yield return AutoDetachNutsCoroutine();
                 if (wheelTwoHandGrab != null)
                 {
@@ -78,6 +111,12 @@ public class WheelGameModeController : MonoBehaviour
                 yield break;
 
             case GameModeManager.GameMode.InstallWheel:
+                if (!isPlayerInteractableWheel)
+                {
+                    AnchorWheelKinematic();
+                    yield break;
+                }
+
                 yield return AutoDetachNutsCoroutine();
                 yield return new WaitForSeconds(delayBeforeWheelRemoval);
                 if (wheelAnimation != null)
@@ -146,6 +185,7 @@ public class WheelGameModeController : MonoBehaviour
 
     void HandleTuercaAttachedToWheel(Tuerca tuerca)
     {
+        if (!isPlayerInteractableWheel) return;
         if (System.Array.IndexOf(attachedNuts, tuerca) < 0) return;
         nutReinstalled = true;
     }
@@ -192,6 +232,7 @@ public class WheelGameModeController : MonoBehaviour
 
     void HandleTuercaDetached(Tuerca tuerca)
     {
+        if (!isPlayerInteractableWheel) return;
         if (isAnimatingChain) return;
         if (wheelAnimation == null) return;
         if (System.Array.IndexOf(attachedNuts, tuerca) < 0) return;
@@ -238,6 +279,62 @@ public class WheelGameModeController : MonoBehaviour
                 nut.AutoDetach(GetOutwardImpulse(nut.transform));
             yield return new WaitForSeconds(perNutDelayFallback);
         }
+    }
+
+    public IEnumerator PlayAutomatedPitStopSequence()
+    {
+        if (IsAutomatedPitStopRunning)
+            yield break;
+
+        IsAutomatedPitStopRunning = true;
+        SetPlayerInteractableWheel(false);
+
+        if (nutGunAnimation != null)
+        {
+            nutGunAnimation.PlayRemoval();
+            yield return new WaitUntil(() => !nutGunAnimation.IsPlaying);
+        }
+        else
+        {
+            yield return AutoDetachNutsCoroutine();
+        }
+
+        yield return PlayWheelRemovalAndWait();
+        yield return PlayWheelInstallationAndWait();
+
+        if (nutGunAnimation != null)
+        {
+            nutGunAnimation.PlayInstallation();
+            yield return new WaitUntil(() => !nutGunAnimation.IsPlaying);
+        }
+
+        IsAutomatedPitStopRunning = false;
+    }
+
+    IEnumerator PlayWheelRemovalAndWait()
+    {
+        if (wheelAnimation == null)
+            yield break;
+
+        bool done = false;
+        UnityEngine.Events.UnityAction onComplete = () => done = true;
+        wheelAnimation.OnRemovalComplete.AddListener(onComplete);
+        wheelAnimation.PlayRemoval();
+        while (!done) yield return null;
+        wheelAnimation.OnRemovalComplete.RemoveListener(onComplete);
+    }
+
+    IEnumerator PlayWheelInstallationAndWait()
+    {
+        if (wheelAnimation == null)
+            yield break;
+
+        bool done = false;
+        UnityEngine.Events.UnityAction onComplete = () => done = true;
+        wheelAnimation.OnInstallationComplete.AddListener(onComplete);
+        wheelAnimation.PlayInstallation();
+        while (!done) yield return null;
+        wheelAnimation.OnInstallationComplete.RemoveListener(onComplete);
     }
 
     void AnchorWheelKinematic()

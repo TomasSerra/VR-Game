@@ -28,10 +28,23 @@ public class F1CarPitMovement : MonoBehaviour
     [SerializeField, Min(0.01f)] float fadeDuration = 3f;
     [SerializeField, Range(0f, 1f)] float fadeStartProgress = 0.3f;
 
+    [Header("Wheel Automation")]
+    [Tooltip("The one wheel the player handles manually. Every other pit wheel will animate automatically after the car stops.")]
+    [SerializeField] WheelGameModeController playerInteractableWheel;
+    [Tooltip("Optional explicit wheel list. Leave empty to auto-find WheelGameModeController components under this car.")]
+    [SerializeField] WheelGameModeController[] pitWheels;
+    [Tooltip("Starts the non-player wheel nut/wheel/nut animation sequence when the car reaches Pit Stop.")]
+    [SerializeField] bool animateNonInteractableWheelsOnStop = true;
+    [Tooltip("If enabled, all non-player wheels animate at the same time. If disabled, they animate one after another.")]
+    [SerializeField] bool runNonInteractableWheelAnimationsInParallel = true;
+
     RuntimeMaterialState[] materialStates;
+    Coroutine nonInteractableWheelRoutine;
 
     void Awake()
     {
+        EnsurePitWheelsIndexed();
+        ApplyPlayerWheelSelection();
         materialStates = CreateMaterialStates();
         RestoreMaterials();
     }
@@ -45,6 +58,7 @@ public class F1CarPitMovement : MonoBehaviour
         RestoreMaterials();
         SetFade(1f);
         ShowRenderers(true);
+        nonInteractableWheelRoutine = null;
     }
 
     public IEnumerator MoveToStop()
@@ -70,6 +84,7 @@ public class F1CarPitMovement : MonoBehaviour
 
         transform.position = toPos;
         transform.rotation = toRot;
+        StartNonInteractableWheelAnimations();
     }
 
     public IEnumerator LeaveAndFade()
@@ -112,6 +127,77 @@ public class F1CarPitMovement : MonoBehaviour
         {
             if (fadeRenderers[i] != null)
                 fadeRenderers[i].enabled = visible;
+        }
+    }
+
+    void StartNonInteractableWheelAnimations()
+    {
+        if (!animateNonInteractableWheelsOnStop)
+            return;
+
+        EnsurePitWheelsIndexed();
+        ApplyPlayerWheelSelection();
+
+        if (playerInteractableWheel == null)
+        {
+            Debug.LogWarning($"[{nameof(F1CarPitMovement)}] Player interactable wheel is not assigned on {name}. Non-interactable wheel animations were skipped.", this);
+            return;
+        }
+
+        if (nonInteractableWheelRoutine != null)
+            StopCoroutine(nonInteractableWheelRoutine);
+
+        nonInteractableWheelRoutine = StartCoroutine(PlayNonInteractableWheelAnimations());
+    }
+
+    IEnumerator PlayNonInteractableWheelAnimations()
+    {
+        var wheelsToAnimate = new List<WheelGameModeController>();
+        if (pitWheels != null)
+        {
+            for (int i = 0; i < pitWheels.Length; i++)
+            {
+                WheelGameModeController wheel = pitWheels[i];
+                if (wheel != null && wheel != playerInteractableWheel)
+                    wheelsToAnimate.Add(wheel);
+            }
+        }
+
+        if (runNonInteractableWheelAnimationsInParallel)
+        {
+            var running = new List<Coroutine>();
+            for (int i = 0; i < wheelsToAnimate.Count; i++)
+                running.Add(StartCoroutine(wheelsToAnimate[i].PlayAutomatedPitStopSequence()));
+
+            for (int i = 0; i < running.Count; i++)
+                yield return running[i];
+        }
+        else
+        {
+            for (int i = 0; i < wheelsToAnimate.Count; i++)
+                yield return wheelsToAnimate[i].PlayAutomatedPitStopSequence();
+        }
+
+        nonInteractableWheelRoutine = null;
+    }
+
+    void EnsurePitWheelsIndexed()
+    {
+        if (pitWheels != null && pitWheels.Length > 0)
+            return;
+
+        pitWheels = GetComponentsInChildren<WheelGameModeController>(true);
+    }
+
+    void ApplyPlayerWheelSelection()
+    {
+        if (pitWheels == null || playerInteractableWheel == null)
+            return;
+
+        for (int i = 0; i < pitWheels.Length; i++)
+        {
+            if (pitWheels[i] != null)
+                pitWheels[i].SetPlayerInteractableWheel(pitWheels[i] == playerInteractableWheel);
         }
     }
 
