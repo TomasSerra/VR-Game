@@ -28,6 +28,14 @@ public class F1CarPitMovement : MonoBehaviour
     [SerializeField, Min(0.01f)] float fadeDuration = 3f;
     [SerializeField, Range(0f, 1f)] float fadeStartProgress = 0.3f;
 
+    [Header("Pit Crew NPC Animations")]
+    [Tooltip("NPC animators that react to the car sequence. Leave empty to auto-find root scene objects named NPC, NPC (1), etc.")]
+    [SerializeField] Animator[] pitCrewAnimators;
+    [SerializeField] bool autoFindPitCrewAnimatorsByName = true;
+    [SerializeField] string pitCrewNpcNamePrefix = "NPC";
+    [SerializeField] string carStartsParameter = "CarStarts";
+    [SerializeField] string carLeavesParameter = "CarLeaves";
+
     [Header("Wheel Automation")]
     [Tooltip("The one wheel the player handles manually. Every other pit wheel will animate automatically after the car stops.")]
     [SerializeField] WheelGameModeController playerInteractableWheel;
@@ -43,6 +51,8 @@ public class F1CarPitMovement : MonoBehaviour
 
     void Awake()
     {
+        EnsurePitCrewAnimatorsIndexed();
+        SetPitCrewAnimationState(false, false);
         EnsurePitWheelsIndexed();
         ApplyPlayerWheelSelection();
         materialStates = CreateMaterialStates();
@@ -58,6 +68,7 @@ public class F1CarPitMovement : MonoBehaviour
         RestoreMaterials();
         SetFade(1f);
         ShowRenderers(true);
+        SetPitCrewAnimationState(false, false);
         nonInteractableWheelRoutine = null;
     }
 
@@ -65,6 +76,8 @@ public class F1CarPitMovement : MonoBehaviour
     {
         if (pitInitial == null || pitStop == null)
             yield break;
+
+        SetPitCrewAnimationState(true, false);
 
         Vector3 fromPos = pitInitial.position;
         Vector3 toPos = pitStop.position;
@@ -92,6 +105,7 @@ public class F1CarPitMovement : MonoBehaviour
         if (pitStop == null || pitFinal == null)
             yield break;
 
+        SetPitCrewAnimationState(true, true);
         PrepareMaterialsForFade();
 
         Vector3 fromPos = transform.position;
@@ -128,6 +142,52 @@ public class F1CarPitMovement : MonoBehaviour
             if (fadeRenderers[i] != null)
                 fadeRenderers[i].enabled = visible;
         }
+    }
+
+    void SetPitCrewAnimationState(bool carStarts, bool carLeaves)
+    {
+        EnsurePitCrewAnimatorsIndexed();
+
+        if (pitCrewAnimators == null) return;
+        for (int i = 0; i < pitCrewAnimators.Length; i++)
+        {
+            Animator animator = pitCrewAnimators[i];
+            if (animator == null)
+                continue;
+
+            if (!string.IsNullOrWhiteSpace(carStartsParameter))
+                animator.SetBool(carStartsParameter, carStarts);
+            if (!string.IsNullOrWhiteSpace(carLeavesParameter))
+                animator.SetBool(carLeavesParameter, carLeaves);
+        }
+    }
+
+    void EnsurePitCrewAnimatorsIndexed()
+    {
+        if (pitCrewAnimators != null && pitCrewAnimators.Length > 0)
+            return;
+
+        if (!autoFindPitCrewAnimatorsByName || string.IsNullOrWhiteSpace(pitCrewNpcNamePrefix))
+            return;
+
+        var animators = new List<Animator>();
+        GameObject[] sceneObjects = Resources.FindObjectsOfTypeAll<GameObject>();
+        for (int i = 0; i < sceneObjects.Length; i++)
+        {
+            GameObject sceneObject = sceneObjects[i];
+            if (sceneObject == null || !sceneObject.scene.IsValid())
+                continue;
+            if (sceneObject.transform.parent != null)
+                continue;
+            if (!sceneObject.name.StartsWith(pitCrewNpcNamePrefix, System.StringComparison.Ordinal))
+                continue;
+
+            Animator animator = sceneObject.GetComponentInChildren<Animator>(true);
+            if (animator != null)
+                animators.Add(animator);
+        }
+
+        pitCrewAnimators = animators.ToArray();
     }
 
     void StartNonInteractableWheelAnimations()
