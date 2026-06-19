@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 
 public class WheelGameModeController : MonoBehaviour
@@ -31,6 +32,10 @@ public class WheelGameModeController : MonoBehaviour
     [SerializeField] PitTimerDisplay pitTimer;
     [SerializeField, Min(0f)] float timeBeforeAlert = 5f;
     [SerializeField, Min(0f)] float timeBetweenAlertAndArrival = 5f;
+    [Tooltip("Segundos tras irse el auto antes de volver al main menu.")]
+    [SerializeField, Min(0f)] float delayBeforeMainMenu = 10f;
+    [Tooltip("Build index de la escena de main menu.")]
+    [SerializeField] int mainMenuSceneIndex = 0;
 
     [Tooltip("Objeto libre que aparece junto al pit alert y se oculta unos segundos después de que el auto llega.")]
     [SerializeField] GameObject carArrivalObject;
@@ -197,6 +202,10 @@ public class WheelGameModeController : MonoBehaviour
 
         if (carMovement != null)
             yield return carMovement.LeaveAndFade();
+
+        // 10 segundos después de que se fue el auto, volver al main menu.
+        yield return new WaitForSeconds(delayBeforeMainMenu);
+        SceneManager.LoadScene(mainMenuSceneIndex);
     }
 
     IEnumerator HideCarArrivalObjectAfterDelay()
