@@ -29,8 +29,13 @@ public class WheelGameModeController : MonoBehaviour
     [SerializeField] F1CarPitMovement carMovement;
     [SerializeField] PitAlertController pitAlert;
     [SerializeField] PitTimerDisplay pitTimer;
-    [SerializeField, Min(0f)] float timeBeforeAlert = 3f;
+    [SerializeField, Min(0f)] float timeBeforeAlert = 5f;
     [SerializeField, Min(0f)] float timeBetweenAlertAndArrival = 5f;
+
+    [Tooltip("Objeto libre que aparece junto al pit alert y se oculta unos segundos después de que el auto llega.")]
+    [SerializeField] GameObject carArrivalObject;
+    [Tooltip("Segundos tras la llegada del auto antes de ocultar el objeto.")]
+    [SerializeField, Min(0f)] float carArrivalObjectHideDelay = 3f;
 
     bool isAnimatingChain;
     bool subscribedToTuerca;
@@ -63,6 +68,9 @@ public class WheelGameModeController : MonoBehaviour
         // En modo Manual la gun se activa recién cuando el auto frena en pits.
         if (gunRoot != null)
             gunRoot.SetActive(false);
+        // El objeto de llegada arranca oculto; aparece/desaparece con el auto en PitStopSequence.
+        if (carArrivalObject != null)
+            carArrivalObject.SetActive(false);
         if (newWheelPickupRoot != null)
             newWheelPickupRoot.SetActive(isPlayerInteractableWheel && mode == GameModeManager.GameMode.InstallWheel);
         if (wheelGrabInteractable != null)
@@ -160,11 +168,19 @@ public class WheelGameModeController : MonoBehaviour
         if (pitAlert != null)
             pitAlert.ShowAlert(timeBetweenAlertAndArrival + arrivalDuration);
 
+        // El objeto aparece junto con el pit alert (cuando se avisa que el auto está llegando).
+        if (carArrivalObject != null)
+            carArrivalObject.SetActive(true);
+
         if (timeBetweenAlertAndArrival > 0f)
             yield return new WaitForSeconds(timeBetweenAlertAndArrival);
 
         if (carMovement != null)
             yield return carMovement.MoveToStop();
+
+        // El auto llegó: ocultar el objeto unos segundos después.
+        if (carArrivalObject != null)
+            StartCoroutine(HideCarArrivalObjectAfterDelay());
 
         if (pitTimer != null)
             pitTimer.StartTimer();
@@ -181,6 +197,13 @@ public class WheelGameModeController : MonoBehaviour
 
         if (carMovement != null)
             yield return carMovement.LeaveAndFade();
+    }
+
+    IEnumerator HideCarArrivalObjectAfterDelay()
+    {
+        yield return new WaitForSeconds(carArrivalObjectHideDelay);
+        if (carArrivalObject != null)
+            carArrivalObject.SetActive(false);
     }
 
     void HandleTuercaAttachedToWheel(Tuerca tuerca)

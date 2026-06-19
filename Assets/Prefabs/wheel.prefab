@@ -714,7 +714,7 @@ MonoBehaviour:
   carMovement: {fileID: 0}
   pitAlert: {fileID: 0}
   pitTimer: {fileID: 0}
-  timeBeforeAlert: 3
+  timeBeforeAlert: 5
   timeBetweenAlertAndArrival: 10
 --- !u!54 &4465922238558247920
 Rigidbody:
