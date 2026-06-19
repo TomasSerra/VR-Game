@@ -1,13 +1,11 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
+using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
 [RequireComponent(typeof(XRGrabInteractable))]
 public class GunActivation : MonoBehaviour
 {
-    [SerializeField] InputActionProperty activateAction;
-
     [SerializeField, Range(0f, 1f)] float oneHandAmplitude = 1.0f;
     [SerializeField, Range(0f, 1f)] float twoHandAmplitude = 0.4f;
     [SerializeField] float hapticInterval = 0.1f;
@@ -34,6 +32,7 @@ public class GunActivation : MonoBehaviour
     Tuerca attachedNut;
     float holdElapsed;
     bool actionFiredThisPress;
+    bool triggerHeld;
 
     static readonly Collider[] overlapBuffer = new Collider[16];
 
@@ -50,12 +49,15 @@ public class GunActivation : MonoBehaviour
 
     void OnEnable()
     {
-        activateAction.action?.Enable();
+        grabInteractable.activated.AddListener(OnActivated);
+        grabInteractable.deactivated.AddListener(OnDeactivated);
     }
 
     void OnDisable()
     {
-        activateAction.action?.Disable();
+        grabInteractable.activated.RemoveListener(OnActivated);
+        grabInteractable.deactivated.RemoveListener(OnDeactivated);
+        triggerHeld = false;
         isOn = false;
         ResetShake();
         if (attachedNut != null)
@@ -65,11 +67,14 @@ public class GunActivation : MonoBehaviour
         }
     }
 
+    void OnActivated(ActivateEventArgs _) => triggerHeld = true;
+    void OnDeactivated(DeactivateEventArgs _) => triggerHeld = false;
+
     void Update()
     {
         int handCount = grabInteractable.interactorsSelecting.Count;
         bool grabbed = handCount > 0;
-        bool pressed = activateAction.action != null && activateAction.action.IsPressed();
+        bool pressed = triggerHeld;
 
         bool wasOn = isOn;
         isOn = grabbed && pressed;
