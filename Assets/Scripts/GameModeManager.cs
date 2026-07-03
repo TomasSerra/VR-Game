@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -8,10 +9,15 @@ public class GameModeManager : MonoBehaviour
     {
         Manual,
         RemoveWheel,
-        InstallWheel
+        InstallWheel,
+        Tutorial
     }
 
     public static GameMode SelectedMode { get; private set; } = GameMode.Manual;
+
+    // Se dispara cada vez que se selecciona un modo (incluso si es el mismo). Las ruedas de
+    // tutorial lo escuchan para resetear y volver a reproducir las animaciones del modo elegido.
+    public static event Action<GameMode> OnModeChanged;
 
     [Header("Scene")]
     [SerializeField] string gameSceneName = "Game";
@@ -68,6 +74,11 @@ public class GameModeManager : MonoBehaviour
         SelectMode(GameMode.InstallWheel);
     }
 
+    public void SelectTutorial()
+    {
+        SelectMode(GameMode.Tutorial);
+    }
+
     public void StartSelectedMode()
     {
         SceneManager.LoadScene(gameSceneName);
@@ -88,11 +99,17 @@ public class GameModeManager : MonoBehaviour
         SelectInstallWheel();
     }
 
+    public void StartTutorial()
+    {
+        SelectTutorial();
+    }
+
     void SelectMode(GameMode mode)
     {
         SelectedMode = mode;
         ApplyTutorialVisibility(mode);
         ApplyButtonColors(mode);
+        OnModeChanged?.Invoke(mode);
     }
 
     void ApplyTutorialVisibility(GameMode selectedMode)

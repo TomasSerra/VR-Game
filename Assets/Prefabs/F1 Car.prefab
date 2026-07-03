@@ -899,22 +899,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   newWheelTag: NewWheel
   oneShot: 1
-  requireTwoHandGrab: 1
+  hideCarriedWheel: 1
+  resetOnModeChange: 1
   OnWheelInstalled:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 2897245550266909268, guid: 748ac3fb9e2f346548d8055810cdcef7, type: 3}
-        m_TargetAssemblyTypeName: WheelGameModeController, Assembly-CSharp
-        m_MethodName: RequestWheelInstallation
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!1001 &912258130011344968
 PrefabInstance:
   m_ObjectHideFlags: 0

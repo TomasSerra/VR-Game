@@ -1200,6 +1200,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 1712128999481245105, guid: d3506b54fd8ef4338a558c2904de7c76, type: 3}
+      propertyPath: tutorialWheel
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1712128999481245105, guid: d3506b54fd8ef4338a558c2904de7c76, type: 3}
       propertyPath: carArrivalObject
       value: 
       objectReference: {fileID: 0}
@@ -4532,6 +4536,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5810482907472056744, guid: 748ac3fb9e2f346548d8055810cdcef7, type: 3}
       propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5810482907472056744, guid: 748ac3fb9e2f346548d8055810cdcef7, type: 3}
+      propertyPath: debugPermaGrab
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5810482907472056744, guid: 748ac3fb9e2f346548d8055810cdcef7, type: 3}
+      propertyPath: alwaysGrabbable
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6001814824303067056, guid: 748ac3fb9e2f346548d8055810cdcef7, type: 3}

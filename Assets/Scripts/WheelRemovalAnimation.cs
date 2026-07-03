@@ -105,6 +105,56 @@ public class WheelRemovalAnimation : MonoBehaviour
         hasCapturedRuntimePhysicsState = true;
     }
 
+    public Vector3 InitialLocalPosition => initialLocalPosition;
+    public Quaternion InitialLocalRotation => initialLocalRotation;
+
+    // Para clones creados en runtime (p.ej. el que reproduce la animación de instalación
+    // mientras el jugador sostiene la rueda real): pisa la pose inicial capturada en Awake,
+    // que en un clon corresponde a la pose de las manos y no al lugar de la rueda en el auto.
+    public void OverrideInitialLocalPose(Vector3 localPosition, Quaternion localRotation)
+    {
+        initialLocalPosition = localPosition;
+        initialLocalRotation = localRotation;
+        transform.localPosition = localPosition;
+        transform.localRotation = localRotation;
+    }
+
+    // Desvanece la rueda en el lugar (sin moverla). Termina con alpha 0; los materiales y
+    // renderers se restauran después con ResetRemoval.
+    public IEnumerator FadeOutRoutine(float duration)
+    {
+        CaptureRuntimePhysicsStateIfNeeded();
+        PrepareMaterialsForFade();
+
+        if (duration > 0f)
+        {
+            float elapsed = 0f;
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                SetFade(1f - Mathf.Clamp01(elapsed / duration));
+                yield return null;
+            }
+        }
+
+        SetFade(0f);
+    }
+
+    public void SetRenderersVisible(bool visible)
+    {
+        if (visible)
+        {
+            RestoreRenderers();
+            return;
+        }
+
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            if (renderers[i] != null)
+                renderers[i].enabled = false;
+        }
+    }
+
     [ContextMenu("Play Removal")]
     public void PlayRemoval()
     {
